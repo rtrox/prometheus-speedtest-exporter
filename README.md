@@ -6,6 +6,10 @@ Prometheus Speedtest Exporter will, when polled by Prometheus, find the closest 
 
 ![Grafana Dashboard](.github/dashboard.png "Grafana Dashboard")
 
+## A Note on Bandwidth Usage
+
+Please note that speedtests by necessity transmit a fair amount of data -- each test run typically transfers 10s of MBs. As such, if you have metered bandwidth, you may want to carefully consider how frequently you are scraping this exporter, as each scrape triggers a test run. The Service Monitor in our [`manifests`](kubernetes/manifests) defaults to scraping every 30 minutes.
+
 ## Operating the Exporter
 
 Prometheus Speedtest Exporter has no required options, however there are several flags which can be passed to control the exporter's behavior. Note that the test typically takes 5-10 seconds to complete, which means that graceful shutdown when a test is in flight can take at least this long.
