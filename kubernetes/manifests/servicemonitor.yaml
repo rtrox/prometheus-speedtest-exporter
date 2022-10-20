@@ -1,0 +1,23 @@
+---
+# Only one ServiceMonitor needed, it will pick
+# up any pod matched by the Service
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/instance: &name prometheus-speedtest-exporter
+    app.kubernetes.io/name: *name
+    app.kubernetes.io/part-of: *name
+    jobLabel: *name
+  name: prometheus-speedtest-exporter
+spec:
+  endpoints:
+    - port: http-metrics
+      scheme: http
+      interval: 30m
+  jobLabel: jobLabel
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: *name
+      app.kubernetes.io/component: metrics
