@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/prometheus/client_golang v1.13.0
-	github.com/prometheus/client_model v0.2.0
+	github.com/prometheus/client_model v0.3.0
 	github.com/rs/zerolog v1.28.0
 	github.com/showwin/speedtest-go v1.1.5
 	github.com/stretchr/testify v1.6.1
