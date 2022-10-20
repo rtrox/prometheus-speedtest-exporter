@@ -7,7 +7,7 @@ require (
 	github.com/prometheus/client_model v0.3.0
 	github.com/rs/zerolog v1.28.0
 	github.com/showwin/speedtest-go v1.1.5
-	github.com/stretchr/testify v1.6.1
+	github.com/stretchr/testify v1.8.0
 	github.com/tj/assert v0.0.3
 )
 
@@ -25,5 +25,5 @@ require (
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200605160147-a5ece683394c // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
