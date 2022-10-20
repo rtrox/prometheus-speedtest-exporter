@@ -1,6 +1,6 @@
 # Prometheus Speedtest Exporter
 
-![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/rtrox/prometheus-speedtest-exporter)![Docker Image Version (latest semver)](https://img.shields.io/docker/v/rtrox/prometheus-speedtest-exporter)![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/rtrox/prometheus-speedtest-exporter)![GitHub branch checks state](https://img.shields.io/github/checks-status/rtrox/prometheus-speedtest-exporter/main)[![Coverage Status](https://coveralls.io/repos/github/rtrox/prometheus-speedtest-exporter/badge.svg?branch=main)](https://coveralls.io/github/rtrox/prometheus-speedtest-exporter?branch=main)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/rtrox/prometheus-speedtest-exporter) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/rtrox/prometheus-speedtest-exporter) ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/rtrox/prometheus-speedtest-exporter) ![GitHub branch checks state](https://img.shields.io/github/checks-status/rtrox/prometheus-speedtest-exporter/main) [![Coverage Status](https://coveralls.io/repos/github/rtrox/prometheus-speedtest-exporter/badge.svg?branch=main)](https://coveralls.io/github/rtrox/prometheus-speedtest-exporter?branch=main)
 
 Prometheus Speedtest Exporter will, when polled by Prometheus, find the closest speedtest server to your location, and perform a download test, an upload test, and a latency test, and then emits the resultos of those tests for collection by Prometheus.
 
