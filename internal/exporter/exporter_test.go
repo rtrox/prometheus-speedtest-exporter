@@ -11,14 +11,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	dto "github.com/prometheus/client_model/go"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/require"
 	"github.com/tj/assert"
 )
 
 func init() {
-	log.Logger = zerolog.New(io.Discard)
+	// log.Logger = zerolog.New(io.Discard)
 }
 
 func TestDescribe(t *testing.T) {

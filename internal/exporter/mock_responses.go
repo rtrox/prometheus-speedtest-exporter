@@ -26,8 +26,8 @@ func NewTestClient() *http.Client {
 
 func speedtestFunc(req *http.Request) *http.Response {
 	var ret *http.Response
-	switch req.URL.String() {
-	case "https://www.speedtest.net/speedtest-config.php":
+	switch req.URL.Path {
+	case "/speedtest-config.php":
 
 		ret = &http.Response{
 			StatusCode: 200,
@@ -36,7 +36,7 @@ func speedtestFunc(req *http.Request) *http.Response {
 			// Must be set to non-nil value or it panics
 			Header: make(http.Header),
 		}
-	case "https://www.speedtest.net/api/js/servers?engine=js&limit=10":
+	case "/api/js/servers":
 		ret = &http.Response{
 			StatusCode: 200,
 			// Send response to be tested
@@ -45,7 +45,7 @@ func speedtestFunc(req *http.Request) *http.Response {
 			Header:        make(http.Header),
 			ContentLength: 100,
 		}
-	case "http://speedtest.example.net:8080/speedtest/upload.php":
+	case "/speedtest/upload.php":
 		ret = &http.Response{
 			StatusCode: 200,
 			// Send response to be tested
@@ -53,7 +53,7 @@ func speedtestFunc(req *http.Request) *http.Response {
 			// Must be set to non-nil value or it panics
 			Header: make(http.Header),
 		}
-	case "http://speedtest.example.net:8080/speedtest/latency.txt":
+	case "/speedtest/latency.txt":
 		ret = &http.Response{
 			StatusCode: 200,
 			// Send response to be tested
@@ -61,7 +61,7 @@ func speedtestFunc(req *http.Request) *http.Response {
 			// Must be set to non-nil value or it panics
 			Header: make(http.Header),
 		}
-	case "http://speedtest.example.net:8080/speedtest/random2500x2500.jpg":
+	case "/speedtest/random2500x2500.jpg":
 		fileBytes, err := os.ReadFile("test2500.jpg")
 		if err != nil {
 			log.Error().Str("url", req.URL.String()).Err(err).Msg("Could not read file")
@@ -73,7 +73,7 @@ func speedtestFunc(req *http.Request) *http.Response {
 			// Must be set to non-nil value or it panics
 			Header: make(http.Header),
 		}
-	case "http://speedtest.example.net:8080/speedtest/random750x750.jpg":
+	case "/speedtest/random750x750.jpg":
 		fileBytes, err := os.ReadFile("test750.jpg")
 		if err != nil {
 			log.Error().Str("url", req.URL.String()).Err(err).Msg("Could not read file")
