@@ -221,7 +221,7 @@ func (e *SpeedtestExporter) UpdateResults() {
 		e.testErrors.Inc()
 		return
 	}
-	log.Debug().Interface("results", targets).Msg("Returning Results")
+	log.Info().Interface("results", targets).Msg("Updated Results")
 	e.cache.Set(targets)
 }
 
