@@ -18,17 +18,19 @@ Prometheus Speedtest Exporter has no required options, however there are several
 /speedtest-exporter -h
 Usage of ./speedtest-exporter:
   -debug
-    	sets log level to debug
+        sets log level to debug
   -gocollector
-    	enables go stats exporter
+        enables go stats exporter
   -graceful-shutdown
-    	allow in flight speed tests to finish before shutting down (default true)
+        allow in flight speed tests to finish before shutting down (default true)
   -graceful-shutdown-timeout duration
-    	graceful shutdown timeout (default 10s)
+        graceful shutdown timeout (default 10s)
   -processcollector
-    	enables process stats exporter
+        enables process stats exporter
+  -saving-mode
+        enables saving mode in speedtest-go to reduce bandwidth usage at the cost of accuracy
   -test-timeout duration
-    	timeout for speedtest runs (default 10s)
+        timeout for speedtest runs (default 10s)
 ```
 
 ## Running via Docker

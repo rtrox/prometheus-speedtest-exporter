@@ -38,12 +38,14 @@ type SpeedtestExporter struct {
 	testTimeout       time.Duration
 	testDuration      prometheus.Gauge
 	getTargetDuration prometheus.Gauge
+	savingMode        bool
 }
 
 type Opts struct {
 	Ctx         context.Context
 	Doer        *http.Client
 	TestTimeout time.Duration
+	SavingMode  bool
 }
 
 func New(opts Opts) *SpeedtestExporter {
@@ -68,6 +70,7 @@ func New(opts Opts) *SpeedtestExporter {
 			Name: "speedtest_target_update_duration_ms",
 			Help: "Duration of speedtest runs in seconds",
 		}),
+		savingMode: opts.SavingMode,
 	}
 	return &ret
 }
@@ -118,11 +121,11 @@ func (e *SpeedtestExporter) RunSpeedtest(targets speedtest.Servers) error {
 		if err != nil {
 			return err
 		}
-		err = srv.DownloadTestContext(ctx, false)
+		err = srv.DownloadTestContext(ctx, e.savingMode)
 		if err != nil {
 			return err
 		}
-		err = srv.UploadTestContext(ctx, false)
+		err = srv.UploadTestContext(ctx, e.savingMode)
 		if err != nil {
 			return err
 		}

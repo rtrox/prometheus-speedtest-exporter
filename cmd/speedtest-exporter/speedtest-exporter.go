@@ -42,6 +42,7 @@ func main() {
 	testTimeout := flag.Duration("test-timeout", 10*time.Second, "timeout for speedtest runs")
 	goCollector := flag.Bool("gocollector", false, "enables go stats exporter")
 	processCollector := flag.Bool("processcollector", false, "enables process stats exporter")
+	savingMode := flag.Bool("saving-mode", false, "enables saving mode in speedtest-go to reduce bandwidth usage at the cost of accuracy")
 	flag.Parse()
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
@@ -89,6 +90,7 @@ func main() {
 	ex := exporter.New(exporter.Opts{
 		Ctx:         exporterCtx,
 		TestTimeout: *testTimeout,
+		SavingMode:  *savingMode,
 	})
 	reg := prometheus.NewPedanticRegistry()
 	reg.MustRegister(appFunc, ex)
