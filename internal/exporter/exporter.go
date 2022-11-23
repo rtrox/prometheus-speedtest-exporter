@@ -154,7 +154,7 @@ func (e *SpeedtestExporter) Collect(ch chan<- prometheus.Metric) {
 		ch <- e.getTargetDuration
 		return
 	}
-	log.Debug().Interface("results", targets).Msg("Returning Results")
+	log.Info().Interface("results", targets).Msg("Updating Results")
 	ch <- e.testDuration
 	ch <- e.getTargetDuration
 	for _, s := range targets {
