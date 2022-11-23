@@ -47,6 +47,7 @@ func TestCollect(t *testing.T) {
 		Doer: NewTestClient(),
 		Ctx:  ctx,
 	})
+	e.UpdateResults()
 	ch := make(chan prometheus.Metric)
 	received := 0
 	go func() {
@@ -97,6 +98,7 @@ func TestAllMetricsPopulated(t *testing.T) {
 		Doer: NewTestClient(),
 		Ctx:  ctx,
 	})
+	e.UpdateResults()
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(e)
 

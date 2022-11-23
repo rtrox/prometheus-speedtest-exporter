@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -32,20 +33,51 @@ var (
 	)
 )
 
+type ResultCache struct {
+	results speedtest.Servers
+	mut     sync.RWMutex
+}
+
+func (r *ResultCache) Set(servers speedtest.Servers) {
+	r.mut.Lock()
+	defer r.mut.Unlock()
+	r.results = servers
+}
+
+func (r *ResultCache) Get() speedtest.Servers {
+	r.mut.RLock()
+	defer r.mut.RUnlock()
+	return r.results
+}
+
+func NewResultCache() *ResultCache {
+	return &ResultCache{
+		results: speedtest.Servers{},
+		mut:     sync.RWMutex{},
+	}
+}
+
 type SpeedtestExporter struct {
-	ctx               context.Context
-	speedtest         *speedtest.Speedtest
-	testTimeout       time.Duration
+	ctx          context.Context
+	done         chan struct{}
+	speedtest    *speedtest.Speedtest
+	cache        *ResultCache
+	testInterval time.Duration
+	testTimeout  time.Duration
+	savingMode   bool
+
 	testDuration      prometheus.Gauge
 	getTargetDuration prometheus.Gauge
-	savingMode        bool
+	testErrors        prometheus.Counter
+	testsRun          prometheus.Counter
 }
 
 type Opts struct {
-	Ctx         context.Context
-	Doer        *http.Client
-	TestTimeout time.Duration
-	SavingMode  bool
+	Ctx          context.Context
+	Doer         *http.Client
+	TestTimeout  time.Duration
+	TestInterval time.Duration
+	SavingMode   bool
 }
 
 func New(opts Opts) *SpeedtestExporter {
@@ -53,15 +85,21 @@ func New(opts Opts) *SpeedtestExporter {
 		opts.Ctx = context.Background()
 	}
 	if opts.Doer == nil {
-		opts.Doer = &http.Client{}
+		opts.Doer = http.DefaultClient
 	}
 	if opts.TestTimeout == 0 {
-		opts.TestTimeout = 10 * time.Second
+		opts.TestTimeout = 1 * time.Minute
+	}
+	if opts.TestInterval == 0 {
+		opts.TestInterval = 1 * time.Hour
 	}
 	ret := SpeedtestExporter{
-		ctx:         opts.Ctx,
-		speedtest:   speedtest.New(speedtest.WithDoer(opts.Doer)),
-		testTimeout: opts.TestTimeout,
+		ctx:          opts.Ctx,
+		speedtest:    speedtest.New(speedtest.WithDoer(opts.Doer)),
+		cache:        NewResultCache(),
+		testTimeout:  opts.TestTimeout,
+		testInterval: opts.TestInterval,
+		savingMode:   opts.SavingMode,
 		testDuration: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "speedtest_test_duration_ms",
 			Help: "Duration of speedtest runs in seconds",
@@ -70,7 +108,14 @@ func New(opts Opts) *SpeedtestExporter {
 			Name: "speedtest_target_update_duration_ms",
 			Help: "Duration of speedtest runs in seconds",
 		}),
-		savingMode: opts.SavingMode,
+		testErrors: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "speedtest_test_errors_total",
+			Help: "Number of errors during speedtest runs",
+		}),
+		testsRun: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "speedtest_tests_run_total",
+			Help: "Number of speedtest runs",
+		}),
 	}
 	return &ret
 }
@@ -81,6 +126,32 @@ func (e *SpeedtestExporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- ul_speed
 	ch <- e.testDuration.Desc()
 	ch <- e.getTargetDuration.Desc()
+	ch <- e.testErrors.Desc()
+}
+
+func (e *SpeedtestExporter) Collect(ch chan<- prometheus.Metric) {
+	ch <- e.testDuration
+	ch <- e.getTargetDuration
+	for _, s := range e.cache.Get() {
+		ch <- prometheus.MustNewConstMetric(
+			latency,
+			prometheus.GaugeValue,
+			float64(s.Latency.Microseconds())/1000,
+			s.ID, s.URL, s.Name, s.Country, s.Sponsor, s.Lat, s.Lon, fmt.Sprintf("%f", s.Distance),
+		)
+		ch <- prometheus.MustNewConstMetric(
+			dl_speed,
+			prometheus.GaugeValue,
+			s.DLSpeed,
+			s.ID, s.URL, s.Name, s.Country, s.Sponsor, s.Lat, s.Lon, fmt.Sprintf("%f", s.Distance),
+		)
+		ch <- prometheus.MustNewConstMetric(
+			ul_speed,
+			prometheus.GaugeValue,
+			s.ULSpeed,
+			s.ID, s.URL, s.Name, s.Country, s.Sponsor, s.Lat, s.Lon, fmt.Sprintf("%f", s.Distance),
+		)
+	}
 }
 
 func (e *SpeedtestExporter) getServers() (speedtest.Servers, error) {
@@ -133,48 +204,38 @@ func (e *SpeedtestExporter) RunSpeedtest(targets speedtest.Servers) error {
 	return nil
 }
 
-func (e *SpeedtestExporter) Collect(ch chan<- prometheus.Metric) {
+func (e *SpeedtestExporter) UpdateResults() {
 	log.Debug().Msg("Collecting Speedtest Target")
 	targets, err := e.getServers()
 	if err != nil {
+		e.cache.Set(speedtest.Servers{})
 		log.Error().Err(err).Msg("Failed to get speedtest targets")
-		ch <- prometheus.NewInvalidMetric(latency, err)
-		ch <- prometheus.NewInvalidMetric(dl_speed, err)
-		ch <- prometheus.NewInvalidMetric(ul_speed, err)
-		ch <- e.getTargetDuration
+		e.testErrors.Inc()
 		return
 	}
 	log.Debug().Interface("targets", targets).Msg("Running Speed Test")
 	err = e.RunSpeedtest(targets)
 	if err != nil {
+		e.cache.Set(speedtest.Servers{})
 		log.Error().Err(err).Msg("Failed to run speedtest")
-		ch <- prometheus.NewInvalidMetric(latency, err)
-		ch <- prometheus.NewInvalidMetric(dl_speed, err)
-		ch <- prometheus.NewInvalidMetric(ul_speed, err)
-		ch <- e.getTargetDuration
+		e.testErrors.Inc()
 		return
 	}
 	log.Debug().Interface("results", targets).Msg("Returning Results")
-	ch <- e.testDuration
-	ch <- e.getTargetDuration
-	for _, s := range targets {
-		ch <- prometheus.MustNewConstMetric(
-			latency,
-			prometheus.GaugeValue,
-			float64(s.Latency.Microseconds())/1000,
-			s.ID, s.URL, s.Name, s.Country, s.Sponsor, s.Lat, s.Lon, fmt.Sprintf("%f", s.Distance),
-		)
-		ch <- prometheus.MustNewConstMetric(
-			dl_speed,
-			prometheus.GaugeValue,
-			s.DLSpeed,
-			s.ID, s.URL, s.Name, s.Country, s.Sponsor, s.Lat, s.Lon, fmt.Sprintf("%f", s.Distance),
-		)
-		ch <- prometheus.MustNewConstMetric(
-			ul_speed,
-			prometheus.GaugeValue,
-			s.ULSpeed,
-			s.ID, s.URL, s.Name, s.Country, s.Sponsor, s.Lat, s.Lon, fmt.Sprintf("%f", s.Distance),
-		)
+	e.cache.Set(targets)
+}
+
+func (e *SpeedtestExporter) TestLoop() {
+	e.UpdateResults()
+	t := time.NewTicker(e.testInterval)
+	for {
+		select {
+		case <-e.ctx.Done():
+			close(e.done)
+			return
+		case <-t.C:
+			e.UpdateResults()
+			e.testsRun.Inc()
+		}
 	}
 }

@@ -29,8 +29,10 @@ Usage of ./speedtest-exporter:
         enables process stats exporter
   -saving-mode
         enables saving mode in speedtest-go to reduce bandwidth usage at the cost of accuracy
+  -test-interval duration
+        interval between speedtest runs (default 1h0m0s)
   -test-timeout duration
-        timeout for speedtest runs (default 10s)
+        timeout for speedtest runs (default 1m0s)
 ```
 
 ## Running via Docker
@@ -74,6 +76,12 @@ kubectl apply -n <your namespace> -f kubernetes/manifests/
 NOTE: dummy data in this output to prevent leakage
 
 ```prometheus
+# HELP speedtest_bytes_downloaded Total bytes downloaded
+# TYPE speedtest_bytes_downloaded counter
+speedtest_bytes_downloaded 3.9929023e+08
+# HELP speedtest_bytes_uploaded Total bytes uploaded
+# TYPE speedtest_bytes_uploaded counter
+speedtest_bytes_uploaded 1.61978916e+08
 # HELP speedtest_download_speed_mbps Latency to Speedtest Server in seconds
 # TYPE speedtest_download_speed_mbps gauge
 speedtest_download_speed_mbps{country="United States",distance="1.0",lat="1.0",lon="-1.0",name="Anytown, USA",server_id="1",sponsor="Dat Sponsor Doh",url="http://speedtest.example.net:8080/speedtest/upload.php"} 716.7810615213976
@@ -89,6 +97,9 @@ speedtest_target_update_duration_ms 0.206249213
 # HELP speedtest_test_duration_ms Duration of speedtest runs in seconds
 # TYPE speedtest_test_duration_ms gauge
 speedtest_test_duration_ms 6.257747472
+# HELP speedtest_unknown_content_size Total number of times the content size was unknown
+# TYPE speedtest_unknown_content_size counter
+speedtest_unknown_content_size 2
 # HELP speedtest_upload_speed_mbps Latency to Speedtest Server in seconds
 # TYPE speedtest_upload_speed_mbps gauge
 speedtest_upload_speed_mbps{country="United States",distance="1.0",lat="1.0",lon="-1.0",name="Anytown, USA",server_id="1",sponsor="Dat Sponsor Doh",url="http://speedtest.example.net:8080/speedtest/upload.php"} 724.4910836862521

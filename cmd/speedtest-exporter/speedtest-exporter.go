@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"speedtest-exporter/internal/app_info"
+	"speedtest-exporter/internal/bandwidth_observer"
 	"speedtest-exporter/internal/exporter"
 	"syscall"
 	"time"
@@ -39,7 +40,8 @@ func main() {
 	debug := flag.Bool("debug", false, "sets log level to debug")
 	gracefulShutdown := flag.Bool("graceful-shutdown", true, "allow in flight speed tests to finish before shutting down")
 	gracefulShutdownTimeout := flag.Duration("graceful-shutdown-timeout", 10*time.Second, "graceful shutdown timeout")
-	testTimeout := flag.Duration("test-timeout", 10*time.Second, "timeout for speedtest runs")
+	testTimeout := flag.Duration("test-timeout", 1*time.Minute, "timeout for speedtest runs")
+	testInterval := flag.Duration("test-interval", 1*time.Hour, "interval between speedtest runs")
 	goCollector := flag.Bool("gocollector", false, "enables go stats exporter")
 	processCollector := flag.Bool("processcollector", false, "enables process stats exporter")
 	savingMode := flag.Bool("saving-mode", false, "enables saving mode in speedtest-go to reduce bandwidth usage at the cost of accuracy")
@@ -87,13 +89,22 @@ func main() {
 		Name:      app_name,
 		Version:   version,
 	})
+	bw := bandwidth_observer.New(http.DefaultTransport)
 	ex := exporter.New(exporter.Opts{
-		Ctx:         exporterCtx,
-		TestTimeout: *testTimeout,
-		SavingMode:  *savingMode,
+		Ctx:          exporterCtx,
+		TestTimeout:  *testTimeout,
+		TestInterval: *testInterval,
+		Doer:         &http.Client{Transport: bw},
+		SavingMode:   *savingMode,
 	})
+
+	go func() {
+		log.Debug().Msg("Starting Result Update Thread")
+		ex.TestLoop()
+	}()
+
 	reg := prometheus.NewPedanticRegistry()
-	reg.MustRegister(appFunc, ex)
+	reg.MustRegister(appFunc, ex, bw)
 
 	if *goCollector {
 		reg.MustRegister(collectors.NewGoCollector())
