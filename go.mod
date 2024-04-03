@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/prometheus/client_golang v1.14.0
-	github.com/prometheus/client_model v0.3.0
+	github.com/prometheus/client_model v0.6.1
 	github.com/rs/zerolog v1.29.0
 	github.com/showwin/speedtest-go v1.2.1
 	github.com/stretchr/testify v1.8.2
@@ -24,6 +24,6 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
