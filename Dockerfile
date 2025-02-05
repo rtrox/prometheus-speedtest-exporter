@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine AS build_base
+FROM golang:1.23-alpine AS build_base
 WORKDIR /tmp/speedtest-exporter
 
 ARG VERSION="devel"
