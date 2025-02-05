@@ -2,7 +2,7 @@ module speedtest-exporter
 
 go 1.21
 
-toolchain go1.23.1
+toolchain go1.23.6
 
 require (
 	github.com/prometheus/client_golang v1.20.5
