@@ -85,6 +85,18 @@ func speedtestFunc(req *http.Request) *http.Response {
 			// Must be set to non-nil value or it panics
 			Header: make(http.Header),
 		}
+	case "/speedtest/random1000x1000.jpg":
+		fileBytes, err := os.ReadFile("test1000.jpg")
+		if err != nil {
+			log.Error().Str("url", req.URL.String()).Err(err).Msg("Could not read file")
+		}
+		ret = &http.Response{
+			StatusCode: 200,
+			// Send response to be tested
+			Body: io.NopCloser(bytes.NewBuffer(fileBytes)),
+			// Must be set to non-nil value or it panics
+			Header: make(http.Header),
+		}
 	default:
 		log.Error().Str("url", req.URL.String()).Msg("Unhandled URL")
 		ret = &http.Response{

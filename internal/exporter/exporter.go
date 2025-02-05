@@ -142,13 +142,13 @@ func (e *SpeedtestExporter) Collect(ch chan<- prometheus.Metric) {
 		ch <- prometheus.MustNewConstMetric(
 			dl_speed,
 			prometheus.GaugeValue,
-			s.DLSpeed,
+			float64(s.DLSpeed),
 			s.ID, s.URL, s.Name, s.Country, s.Sponsor, s.Lat, s.Lon, fmt.Sprintf("%f", s.Distance),
 		)
 		ch <- prometheus.MustNewConstMetric(
 			ul_speed,
 			prometheus.GaugeValue,
-			s.ULSpeed,
+			float64(s.ULSpeed),
 			s.ID, s.URL, s.Name, s.Country, s.Sponsor, s.Lat, s.Lon, fmt.Sprintf("%f", s.Distance),
 		)
 	}
@@ -168,7 +168,7 @@ func (e *SpeedtestExporter) getServers() (speedtest.Servers, error) {
 
 	listCtx, cancel := context.WithTimeout(e.ctx, 1500*time.Millisecond)
 	defer cancel()
-	serverList, err := e.speedtest.FetchServerListContext(listCtx, user)
+	serverList, err := e.speedtest.FetchServerListContext(listCtx)
 	if err != nil {
 		return nil, err
 	}
@@ -188,15 +188,15 @@ func (e *SpeedtestExporter) RunSpeedtest(targets speedtest.Servers) error {
 		defer timer.ObserveDuration()
 		ctx, cancel := context.WithTimeout(e.ctx, e.testTimeout)
 		defer cancel()
-		err := srv.PingTestContext(ctx)
+		err := srv.PingTestContext(ctx, func(time.Duration) {})
 		if err != nil {
 			return err
 		}
-		err = srv.DownloadTestContext(ctx, e.savingMode)
+		err = srv.DownloadTestContext(ctx)
 		if err != nil {
 			return err
 		}
-		err = srv.UploadTestContext(ctx, e.savingMode)
+		err = srv.UploadTestContext(ctx)
 		if err != nil {
 			return err
 		}

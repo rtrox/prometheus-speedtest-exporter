@@ -118,7 +118,7 @@ func TestAllMetricsPopulated(t *testing.T) {
 		match *regexp.Regexp
 	}{
 		{"speed_test_download_speed_desc", regexp.MustCompile(`(?m)^# HELP speedtest_download_speed_mbps .+$`)},
-		{"speed_test_download_speed", regexp.MustCompile(`(?m)^speedtest_download_speed_mbps{country=".+",distance="[0-9\.]+",lat="[0-9\.\-]+",lon="[0-9\.\-]+",name=".+",server_id="[0-9]+",sponsor=".+",url=".+"} [0-9\.]+$`)},
+		{"speed_test_download_speed", regexp.MustCompile(`(?m)^speedtest_download_speed_mbps{country=".+",distance="[0-9\.]+",lat="[0-9\.\-]+",lon="[0-9\.\-]+",name=".+",server_id="[0-9]+",sponsor=".+",url=".+"} [0-9e+\.]+$`)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
