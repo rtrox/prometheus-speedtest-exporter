@@ -7,7 +7,7 @@ toolchain go1.23.6
 require (
 	github.com/prometheus/client_golang v1.21.0
 	github.com/prometheus/client_model v0.6.1
-	github.com/rs/zerolog v1.33.0
+	github.com/rs/zerolog v1.34.0
 	github.com/showwin/speedtest-go v1.7.10
 	github.com/stretchr/testify v1.10.0
 	github.com/tj/assert v0.0.3
