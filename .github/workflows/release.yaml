@@ -14,7 +14,7 @@ jobs:
       on_main_branch: ${{ steps.register_tag.outputs.on_main_branch }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: git fetch --force --tags
@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - run: git fetch --force --tags
@@ -45,7 +45,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.24
+          go-version: 1.19
         id: go
 
       - name: Create Release
@@ -62,7 +62,7 @@ jobs:
     if: ${{ needs.main-branch-check.outputs.on_main_branch }} == true
     steps:
       - name: checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: prepare
         id: prepare
