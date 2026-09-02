@@ -6,7 +6,7 @@ toolchain go1.27.0
 
 require (
 	github.com/prometheus/client_golang v1.24.1
-	github.com/prometheus/client_model v0.6.2
+	github.com/prometheus/client_model v0.6.3
 	github.com/rs/zerolog v1.35.1
 	github.com/showwin/speedtest-go v1.8.2
 	github.com/stretchr/testify v1.12.1
@@ -23,5 +23,5 @@ require (
 	github.com/prometheus/procfs v0.21.1 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/sys v0.47.0 // indirect
-	google.golang.org/protobuf v1.36.11 // indirect
+	google.golang.org/protobuf v1.36.12 // indirect
 )
